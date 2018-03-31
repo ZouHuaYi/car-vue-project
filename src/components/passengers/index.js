@@ -1,0 +1,7 @@
+exports.pass_place = require('./place/index')
+exports.pass_areas = require('./place/areas')
+exports.pass_pay = require('./payorder/index')
+exports.pass_user = require('./user/index')
+exports.pass_order = require('./user/order')
+exports.pass_glod = require('./user/glod')
+exports.pass_setuser = require('./user/set_user')

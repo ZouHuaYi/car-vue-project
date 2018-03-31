@@ -1,0 +1,235 @@
+<template>
+    <div ref="wrapper" class="list-wrapper"> 
+        <div class="scroll-content" :style="{paddingBottom:-upBottom+'rem'}">       
+            <slot></slot>
+            <div :style="{marginTop:upBottom+'rem'}">
+                <div v-show="!alldatafinish" >
+                    <div class="pullup"  v-show="!inPullUp && dataList.length>0 && pullUpLoad">{{beforePullUpWord}}</div>
+                    <div class="pullup" v-show="inPullUp"><img src="./img/loading-1.gif"  alt=""><span>{{PullingUpWord}}</span></div>
+                </div> 
+                <div v-show="alldatafinish">
+                    <div class="pullup" >{{finishPullUpWord}}</div>
+                </div>  
+            </div> 
+            <div :style="{'top':(downTop-2.5)+'rem'}" class="pullDown" v-show="pullDownCode" ><span>{{PullDownWord}}</span></div>
+        </div>
+         
+        <transition name="pullDown">
+            <div :style="{'top':downTop+'rem'}" class="pullDown" v-show="inPullDown"><img src="./img/loading-1.gif"  alt=""><span>{{PullingDownWord}}</span></div>
+           
+        </transition> 
+    </div>
+</template>
+<script >
+
+/**
+组件使用方法
+1.派发加载事件
+    pullDownRefresh:{threshold:80,stop:40}这是阀值
+    pullUpLoad:{threshold:-80}
+2.$emit触发事件:
+    @onPullUp="pullUpHandle"
+    @onPullDown="pullDownHandle"
+3.通过监听得到获得scroll对象
+    computed:{scrollElement(){return this.$refs.scroll}},
+4.可以修改文字和结束滚动事件，
+    continuePullUp=false;
+5.数据数组要绑定length大于零。    
+**/
+
+  import BScroll from 'better-scroll'
+  const  PullingUpWord="正在加载中...";
+  const  beforePullUpWord="↑↑上拉加载更多";
+  const  finishPullUpWord="数据加载完成";
+  const  PullingDownWord="加载中...";
+  const  PullDownWord="↑↑放松刷新";
+  export default {
+    props: {
+      dataList:{
+        type: [Array,Object],
+        default: []
+      },
+      probeType: {
+        type: Number,
+        default: 3
+      },
+      click: {
+        type: Boolean,
+        default: true
+      },   
+      pullDownRefresh: {
+        type: null,
+        default: false
+      },
+      pullUpLoad: {
+        type: null,
+        default: false
+      },
+      downTop: {
+        type: [Number,String],
+        default: 0
+      },
+      upBottom: {
+        type: [Number,String],
+        default: 0
+      }
+    },
+    data() {
+        return {  
+            scroll:null,
+            inPullUp:false,
+            inPullDown:false,
+            beforePullUpWord,
+            PullingUpWord,
+            PullingDownWord,
+            finishPullUpWord,
+            PullDownWord,
+            continuePullUp:true,
+            continuePullDown:true,
+            alldatafinish:false,
+            pullDownCode:false
+        }
+    },  
+    mounted() {
+        setTimeout(()=>{
+            this.initScroll();
+            this.scroll.on('pullingUp',()=> {
+                if(this.continuePullUp){
+                    this.beforePullUp();
+                    this.$emit("onPullUp","当前状态：上拉加载");
+                  }
+            });
+            this.scroll.on('pullingDown',()=> {
+                if(this.continuePullDown){
+                    this.beforePullDown()
+                    this.$emit("onPullDown","当前状态：下拉加载");
+                }
+            })
+            this.scroll.on('scroll',(pos)=> {
+                this.$emit("onScroll",pos);
+            })
+            this.scroll.on('scrollStart',(pos)=> {
+                this.pullDownCode = true;
+            })
+            this.scroll.on('touchEnd',(pos)=> {
+                this.pullDownCode = false;
+            })
+            
+        },20)
+    },
+    methods: {
+        initScroll() {
+            if (!this.$refs.wrapper) {
+                return
+            }
+            this.scroll = new BScroll(this.$refs.wrapper, {
+                probeType: this.probeType,
+                click: this.click,       
+                pullDownRefresh: this.pullDownRefresh,
+                pullUpLoad: this.pullUpLoad,
+            })
+        },
+        beforePullUp(){
+            this.PullingUpWord=PullingUpWord;
+            this.inPullUp=true;
+        }, 
+        beforePullDown(){
+            this.disable();
+            this.alldatafinish=false;
+            this.inPullDown=true;
+        },
+        disContinue(){
+            this.alldatafinish=true;
+        },
+        finish(type){
+            this["finish"+type]();
+            this.enable();
+            this["in"+type]=false;  
+        },
+        disable() {
+            this.scroll && this.scroll.disable()
+        },
+        enable() {
+            this.scroll && this.scroll.enable()
+        },
+        refresh() {
+            this.scroll && this.scroll.refresh()
+        }, 
+        finishPullDown(){
+            this.scroll&&this.scroll.finishPullDown()
+        },
+        finishPullUp(){
+            this.scroll&&this.scroll.finishPullUp()
+        }, 
+        startScroll(){
+            setTimeout(()=>{
+                 this.refresh();
+                this.scroll.scrollTo(0,0)
+            },14)
+        }     
+    },       
+    watch: {
+        dataList() {                
+            this.$nextTick(()=>{
+                this.refresh();                       
+            })  
+        }
+    },
+  }
+</script>
+
+<style scoped>
+.list-wrapper{
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom:0;
+    right:0;
+    overflow: hidden;
+}
+.list-content{
+  position: relative;
+  z-index: 10;
+}    
+.pulldown-wrapper{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    display: flex;
+    justify-content :center;
+    align-items: center;
+    transition: all;
+}
+.pullup-wrapper{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.4rem 0;
+}
+.pullDown-enter-active{
+    transition:all 0.2s;
+}
+.pullDown-enter, .pullDown-leave-active{
+    transform:translateY(-100%);
+    transition:all 0.2s;
+}
+.pullDown{
+    position: absolute;
+    left:0;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+}
+.pullup{
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+}
+.pullup img,.pullDown img{
+    width: 0.75rem;
+    vertical-align: middle;
+}
+</style>

@@ -1,0 +1,19 @@
+/login        登录
+/pass/place   下单
+/pass/areas   下单地址
+/pass/pay     订单状态
+/pass/user    个人中心
+/pass/order   个人订单
+/pass/glod    个人金豆
+/pass/setuser  设置
+
+/driver/order   司机抢单
+/driver/pay     订单状态
+/driver/user    司机个人中心
+
+0 待派单(未有接单) 
+1已派单(有司机接了，但未确认上车) 
+2待确认(司机已确认上车，等付乘客支付) 
+3待支付(乘客确认到达，等付乘客支付) 
+4完成(乘客已完成支付) 
+5无效(乘客已取消的订单)

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
+    <title>鹰卡出行</title>
+    <script type="text/javascript">
+	(function(doc, win){ 
+		doc.oncontextmenu=function(e){e.preventDefault();};
+		var docE1 = doc.documentElement, 
+		resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize', 
+		recalc = function(){ 
+			var clientWidth = docE1.clientWidth; 
+			if(!clientWidth) return; 
+			if(clientWidth>=750){
+				docE1.style.fontSize = 80 + 'px';  
+			}else{
+				docE1.style.fontSize = 40*(clientWidth/750) + 'px';  
+			}
+		}; 
+		if (!doc.addEventListener) return; 
+		win.addEventListener(resizeEvt,recalc,false); 
+		doc.addEventListener('DOMContentLoaded',recalc,false); 
+	})(document,window);
+    baseFile='/'
+	</script>
+  </head>
+  <body>
+    <div id="container"></div>
+    <div id="layer-toast"></div>
+  </body>  
+</html>
